@@ -61,19 +61,19 @@ type providerContext struct {
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			providerAPIURLAttr: {
+			"providerAPIURLAttr": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "https://api.circonus.com/v2",
 				Description: providerDescription[providerAPIURLAttr],
 			},
-			providerAutoTagAttr: {
+			"providerAutoTagAttr": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     defaultAutoTag,
 				Description: providerDescription[providerAutoTagAttr],
 			},
-			providerKeyAttr: {
+			"providerKeyAttr": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
