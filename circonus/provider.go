@@ -9,6 +9,49 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// Provider returns a terraform.ResourceProvider.
+func Provider() terraform.ResourceProvider {
+	return &schema.Provider{
+		Schema: map[string]*schema.Schema{
+			"providerAPIURLAttr": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "https://api.circonus.com/v2",
+				Description: providerDescription[providerAPIURLAttr],
+			},
+			"providerAutoTagAttr": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     defaultAutoTag,
+				Description: providerDescription[providerAutoTagAttr],
+			},
+			"providerKeyAttr": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("CIRCONUS_API_TOKEN", nil),
+				Description: providerDescription[providerKeyAttr],
+			},
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"circonus_account":   dataSourceCirconusAccount(),
+			"circonus_collector": dataSourceCirconusCollector(),
+		},
+
+		ResourcesMap: map[string]*schema.Resource{
+			"circonus_check":          resourceCheck(),
+			"circonus_contact_group":  resourceContactGroup(),
+			"circonus_graph":          resourceGraph(),
+			"circonus_metric":         resourceMetric(),
+			"circonus_metric_cluster": resourceMetricCluster(),
+			"circonus_rule_set":       resourceRuleSet(),
+		},
+
+		ConfigureFunc: providerConfigure,
+	}
+}
+
 const (
 	defaultCirconus404ErrorString        = "API response code 404:"
 	defaultCirconusAggregationWindow     = "300s"
@@ -55,49 +98,6 @@ type providerContext struct {
 
 	// defaultTag make up the tag to be used when autoTag tags a tag.
 	defaultTag circonusTag
-}
-
-// Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
-		Schema: map[string]*schema.Schema{
-			"providerAPIURLAttr": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "https://api.circonus.com/v2",
-				Description: providerDescription[providerAPIURLAttr],
-			},
-			"providerAutoTagAttr": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     defaultAutoTag,
-				Description: providerDescription[providerAutoTagAttr],
-			},
-			"providerKeyAttr": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("CIRCONUS_API_TOKEN", nil),
-				Description: providerDescription[providerKeyAttr],
-			},
-		},
-
-		DataSourcesMap: map[string]*schema.Resource{
-			"circonus_account":   dataSourceCirconusAccount(),
-			"circonus_collector": dataSourceCirconusCollector(),
-		},
-
-		ResourcesMap: map[string]*schema.Resource{
-			"circonus_check":          resourceCheck(),
-			"circonus_contact_group":  resourceContactGroup(),
-			"circonus_graph":          resourceGraph(),
-			"circonus_metric":         resourceMetric(),
-			"circonus_metric_cluster": resourceMetricCluster(),
-			"circonus_rule_set":       resourceRuleSet(),
-		},
-
-		ConfigureFunc: providerConfigure,
-	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
